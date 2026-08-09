@@ -1,2 +1,2 @@
 # rish.katt
-a digital abstraction of myself
+a virtual abstraction of myself
