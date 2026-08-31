@@ -10,7 +10,11 @@ class GameScene extends Phaser.Scene {
   }
 
   create() {
+    this.add.rectangle(640, 360, 1280, 720, 0x87ceeb)
+    this.player = this.add.circle(640, 360, 20, 0xff0000)
+    this.cursors = this.input.keyboard!.createCursorKeys()
     this.add.text(100, 100, 'Hello, Phaser!')
+    this.cameras.main.startFollow(this.player)
   }
 }
 
