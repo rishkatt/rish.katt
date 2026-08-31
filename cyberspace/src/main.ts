@@ -16,6 +16,26 @@ class GameScene extends Phaser.Scene {
     this.add.text(100, 100, 'Hello, Phaser!')
     this.cameras.main.startFollow(this.player)
   }
+  update() {
+
+    if (this.cursors.left.isDown) {
+      this.player.x -= 5
+    }
+
+    if (this.cursors.right.isDown) {
+      this.player.x += 5
+    }
+
+    if (this.cursors.up.isDown) {
+      this.player.y -= 5
+    }
+
+    if (this.cursors.down.isDown) {
+      this.player.y += 5
+    }
+
+  }
+
 }
 
 const config: Phaser.Types.Core.GameConfig = {
