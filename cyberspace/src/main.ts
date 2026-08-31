@@ -1,6 +1,10 @@
 import Phaser from 'phaser'
 
 class GameScene extends Phaser.Scene {
+  
+  cursors!: Phaser.Types.Input.Keyboard.CursorKeys
+  player!: Phaser.GameObjects.Arc
+
   constructor() {
     super('GameScene')
   }
