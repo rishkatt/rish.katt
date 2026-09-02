@@ -53,9 +53,71 @@
          "width":20,
          "x":0,
          "y":0
+        }, 
+        {
+         "draworder":"topdown",
+         "id":7,
+         "name":"Interactables",
+         "objects":[
+                {
+                 "height":40.4578324792874,
+                 "id":6,
+                 "name":"testObject",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"action",
+                         "type":"string",
+                         "value":"message"
+                        }, 
+                        {
+                         "name":"message",
+                         "type":"string",
+                         "value":"Hello from tiled!"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":23.2939035486805,
+                 "x":593.381543029548,
+                 "y":77.2376801877305
+                }, 
+                {
+                 "height":40.4578324792874,
+                 "id":7,
+                 "name":"secondObject",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"action",
+                         "type":"string",
+                         "value":"link"
+                        }, 
+                        {
+                         "name":"message",
+                         "type":"string",
+                         "value":"This is the second interactable!"
+                        }, 
+                        {
+                         "name":"url",
+                         "type":"string",
+                         "value":"https:\/\/www.google.com\/"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":23.2939035486806,
+                 "x":1043.32167999617,
+                 "y":83.3676548058043
+                }],
+         "opacity":1,
+         "type":"objectgroup",
+         "visible":true,
+         "x":0,
+         "y":0
         }],
- "nextlayerid":6,
- "nextobjectid":1,
+ "nextlayerid":8,
+ "nextobjectid":8,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",
