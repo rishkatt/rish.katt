@@ -1,5 +1,9 @@
 import Phaser from 'phaser'
 import testMap from './assets/maps/test-map.json'
+import testHubMap from './assets/maps/test-hub.json'
+import projectsHubMap from './assets/maps/projects-hub.json'
+import contactHubMap from './assets/maps/contact-hub.json'
+import interestsHubMap from './assets/maps/interests-hub.json'
 import grassImg from './assets/tilesets/grass.png'
 import wallImg from './assets/tilesets/wall.png'
 
@@ -12,6 +16,8 @@ class GameScene extends Phaser.Scene {
     action: string
     message: string
     url: string
+    targetMap: string
+    targetSpawn: string
   }[] = []
   player!: Phaser.GameObjects.Arc
   dialogueText!: Phaser.GameObjects.Text
@@ -20,26 +26,54 @@ class GameScene extends Phaser.Scene {
   interactionMessage = 'No message found.'
   interactionAction = 'message'
   interactionUrl = ''
+  interactionTargetMap = ''
+  interactionTargetSpawn = 'entrance'
+  currentMapKey = 'test-map'
+  currentSpawn = 'entrance'
 
   constructor() {
     super('GameScene')
   }
 
+  init(data: { mapKey?: string; spawn?: string }) {
+    if (data.mapKey) {
+      this.currentMapKey = data.mapKey
+    }
+
+    if (data.spawn) {
+      this.currentSpawn = data.spawn
+    }
+  }
+
   preload() {
     this.load.tilemapTiledJSON('test-map', testMap)
+    this.load.tilemapTiledJSON('about-hub', testHubMap)
+    this.load.tilemapTiledJSON('projects-hub', projectsHubMap)
+    this.load.tilemapTiledJSON('contact-hub', contactHubMap)
+    this.load.tilemapTiledJSON('interests-hub', interestsHubMap)
     this.load.image('grass', grassImg)
     this.load.image('wall', wallImg)
   }
 
   create() {
-    const map = this.make.tilemap({ key: 'test-map' })
+    this.interactionZones = []
+    const map = this.make.tilemap({ key: this.currentMapKey })
     const tileset = map.addTilesetImage('grass', 'grass')
     const wallTileset = map.addTilesetImage('wall', 'wall')
     map.createLayer('Ground', tileset!, 0, 0)
     const collisionLayer = map.createLayer('Collision', wallTileset!, 0, 0)
     collisionLayer!.setCollisionByExclusion([-1])
 
-    this.player = this.add.circle(640, 360, 20, 0xff0000)
+    const spawnPoints = map.getObjectLayer('SpawnPoints')
+
+    const spawnPoint = spawnPoints?.objects.find(
+      object => object.name === this.currentSpawn
+    )
+
+    const spawnX = spawnPoint?.x ?? 640
+    const spawnY = spawnPoint?.y ?? 360
+
+    this.player = this.add.circle(spawnX, spawnY, 20, 0xff0000)
     this.physics.add.existing(this.player)
     this.physics.add.collider(this.player, collisionLayer!)
 
@@ -58,6 +92,14 @@ class GameScene extends Phaser.Scene {
         property => property.name === 'url'
       )
 
+      const targetMapProperty = object.properties?.find(
+        property => property.name === 'targetMap'
+      )
+
+      const targetSpawnProperty = object.properties?.find(
+        property => property.name === 'targetSpawn'
+      )
+
       const interactionZone = this.add.zone(
         object.x + object.width / 2,
         object.y + object.height / 2,
@@ -71,7 +113,9 @@ class GameScene extends Phaser.Scene {
         zone: interactionZone,
         action: actionProperty?.value ?? 'message',
         message: messageProperty?.value ?? 'No message found.',
-        url: urlProperty?.value ?? ''
+        url: urlProperty?.value ?? '',
+        targetMap: targetMapProperty?.value ?? '',
+        targetSpawn: targetSpawnProperty?.value ?? 'entrance'
       })
 
       const debugGraphics = this.add.graphics()
@@ -130,6 +174,8 @@ class GameScene extends Phaser.Scene {
         this.interactionMessage = interactable.message
         this.interactionAction = interactable.action
         this.interactionUrl = interactable.url
+        this.interactionTargetMap = interactable.targetMap
+        this.interactionTargetSpawn = interactable.targetSpawn
         break
       }
     }
@@ -175,6 +221,16 @@ class GameScene extends Phaser.Scene {
         this.interactionUrl
       ) {
         window.open(this.interactionUrl, '_blank')
+      }
+
+      if (
+        this.interactionAction === 'transition' &&
+        this.interactionTargetMap
+      ) {
+        this.scene.restart({
+              mapKey: this.interactionTargetMap,
+              spawn: this.interactionTargetSpawn
+        })
       }
     }
 
