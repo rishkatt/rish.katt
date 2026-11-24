@@ -134,16 +134,50 @@
                  "y":680
                 }, 
                 {
-                 "height":0,
-                 "id":6,
-                 "name":"",
+                 "height":52,
+                 "id":7,
+                 "name":"testingPortfolioData",
                  "opacity":1,
+                 "properties":[
+                        {
+                         "name":"action",
+                         "type":"string",
+                         "value":"project"
+                        }, 
+                        {
+                         "name":"projectId",
+                         "type":"string",
+                         "value":"portfolio-game"
+                        }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
-                 "width":0,
-                 "x":596,
-                 "y":-18.6666666666667
+                 "width":96,
+                 "x":242.666666666667,
+                 "y":316
+                }, 
+                {
+                 "height":44,
+                 "id":8,
+                 "name":"testingPortfolioData2",
+                 "opacity":1,
+                 "properties":[
+                        {
+                         "name":"action",
+                         "type":"string",
+                         "value":"project"
+                        }, 
+                        {
+                         "name":"projectId",
+                         "type":"string",
+                         "value":"example-project"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":60,
+                 "x":394.666666666667,
+                 "y":318.666666666667
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -176,7 +210,7 @@
          "y":0
         }],
  "nextlayerid":6,
- "nextobjectid":7,
+ "nextobjectid":9,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.12.2",
