@@ -1,4 +1,6 @@
 import Phaser from 'phaser'
+import { aboutData } from './data/about'
+import { getProjectById } from './data/projects'
 import testMap from './assets/maps/test-map.json'
 import testHubMap from './assets/maps/test-hub.json'
 import projectsHubMap from './assets/maps/projects-hub.json'
@@ -11,6 +13,8 @@ class GameScene extends Phaser.Scene {
   
   cursors!: Phaser.Types.Input.Keyboard.CursorKeys
   interactKey!: Phaser.Input.Keyboard.Key
+  githubKey!: Phaser.Input.Keyboard.Key
+  liveDemoKey!: Phaser.Input.Keyboard.Key
   interactionZones: {
     zone: Phaser.GameObjects.Zone
     action: string
@@ -18,6 +22,7 @@ class GameScene extends Phaser.Scene {
     url: string
     targetMap: string
     targetSpawn: string
+    projectId: string
   }[] = []
   player!: Phaser.GameObjects.Arc
   dialogueText!: Phaser.GameObjects.Text
@@ -28,6 +33,7 @@ class GameScene extends Phaser.Scene {
   interactionUrl = ''
   interactionTargetMap = ''
   interactionTargetSpawn = 'entrance'
+  interactionProjectId = ''
   currentMapKey = 'test-map'
   currentSpawn = 'entrance'
 
@@ -100,6 +106,10 @@ class GameScene extends Phaser.Scene {
         property => property.name === 'targetSpawn'
       )
 
+      const projectIdProperty = object.properties?.find(
+        property => property.name === 'projectId'
+      )
+
       const interactionZone = this.add.zone(
         object.x + object.width / 2,
         object.y + object.height / 2,
@@ -115,7 +125,8 @@ class GameScene extends Phaser.Scene {
         message: messageProperty?.value ?? 'No message found.',
         url: urlProperty?.value ?? '',
         targetMap: targetMapProperty?.value ?? '',
-        targetSpawn: targetSpawnProperty?.value ?? 'entrance'
+        targetSpawn: targetSpawnProperty?.value ?? 'entrance',
+        projectId: projectIdProperty?.value ?? ''
       })
 
       const debugGraphics = this.add.graphics()
@@ -140,15 +151,23 @@ class GameScene extends Phaser.Scene {
     )
     
     this.cursors = this.input.keyboard!.createCursorKeys()
+
     this.interactKey = this.input.keyboard!.addKey(
       Phaser.Input.Keyboard.KeyCodes.E
     )
+    this.githubKey = this.input.keyboard!.addKey(
+      Phaser.Input.Keyboard.KeyCodes.G
+    )
+    this.liveDemoKey = this.input.keyboard!.addKey(
+      Phaser.Input.Keyboard.KeyCodes.L
+    )
+
     this.add.text(100, 100, 'Hello, Phaser!')
     this.cameras.main.startFollow(this.player)
 
     this.dialogueText = this.add.text(
       20,
-      650,
+      560,
       '',
       {
         fontSize: '24px',
@@ -161,88 +180,189 @@ class GameScene extends Phaser.Scene {
       }
     )
 
+    this.dialogueText.setWordWrapWidth(1200)
+    this.dialogueText.setDepth(1000)
     this.dialogueText.setScrollFactor(0)
     this.dialogueText.setVisible(false)
+
+
+    const testProject = getProjectById('portfolio-game')
+
+    if (testProject) {
+      console.log('Project found:', testProject.title)
+      console.log('Description:', testProject.description)
+      console.log('Technologies:', testProject.technologies)
+    } else {
+      console.log('Project not found.')
+    }
+
   }
 
-  update() {
-    this.canInteract = false
-
-    for (const interactable of this.interactionZones) {
-      if (this.physics.overlap(this.player, interactable.zone)) {
-        this.canInteract = true
-        this.interactionMessage = interactable.message
-        this.interactionAction = interactable.action
-        this.interactionUrl = interactable.url
-        this.interactionTargetMap = interactable.targetMap
-        this.interactionTargetSpawn = interactable.targetSpawn
-        break
-      }
-    }
-
-    const body = this.player.body as Phaser.Physics.Arcade.Body
-
-    body.setVelocity(0)
-
-    if (this.cursors.left.isDown) {
-      body.setVelocityX(-200)
-    }
-
-    if (this.cursors.right.isDown) {
-      body.setVelocityX(200)
-    }
-
-    if (this.cursors.up.isDown) {
-      body.setVelocityY(-200)
-    }
-
-    if (this.cursors.down.isDown) {
-      body.setVelocityY(200)
-    }
-
-    if (
-      this.canInteract &&
-      Phaser.Input.Keyboard.JustDown(this.interactKey)
-    ) {
-      if (this.interactionAction === 'message') {
-        if (this.dialogueOpen) {
-          this.dialogueText.setVisible(false)
-          this.dialogueOpen = false
-        } else {
-          this.dialogueText.setText(this.interactionMessage)
-
-          this.dialogueText.setVisible(true)
-          this.dialogueOpen = true
-        }
-      }
-
-      if (
-        this.interactionAction === 'link' &&
-        this.interactionUrl
-      ) {
-        window.open(this.interactionUrl, '_blank')
-      }
-
-      if (
-        this.interactionAction === 'transition' &&
-        this.interactionTargetMap
-      ) {
-        this.scene.restart({
-              mapKey: this.interactionTargetMap,
-              spawn: this.interactionTargetSpawn
-        })
-      }
-    }
-
-    if (
-      this.dialogueOpen &&
-      (!this.canInteract || this.interactionAction !== 'message')
-    ) {
+  toggleDialogue(message: string) {
+    if (this.dialogueOpen) {
       this.dialogueText.setVisible(false)
       this.dialogueOpen = false
+    } else {
+      this.dialogueText.setText(message)
+      this.dialogueText.setVisible(true)
+      this.dialogueOpen = true
+    }
+  }
+
+
+  update() {
+  this.canInteract = false
+
+  // Check whether the player is inside an interaction zone
+  for (const interactable of this.interactionZones) {
+    if (this.physics.overlap(this.player, interactable.zone)) {
+      this.canInteract = true
+      this.interactionMessage = interactable.message
+      this.interactionAction = interactable.action
+      this.interactionUrl = interactable.url
+      this.interactionTargetMap = interactable.targetMap
+      this.interactionTargetSpawn = interactable.targetSpawn
+      this.interactionProjectId = interactable.projectId
+      break
+    }
+  }
+
+  // Player movement
+  const body = this.player.body as Phaser.Physics.Arcade.Body
+
+  body.setVelocity(0)
+
+  if (this.cursors.left.isDown) {
+    body.setVelocityX(-200)
+  }
+
+  if (this.cursors.right.isDown) {
+    body.setVelocityX(200)
+  }
+
+  if (this.cursors.up.isDown) {
+    body.setVelocityY(-200)
+  }
+
+  if (this.cursors.down.isDown) {
+    body.setVelocityY(200)
+  }
+
+  // Handle interactions when E is pressed
+  if (
+    this.canInteract &&
+    Phaser.Input.Keyboard.JustDown(this.interactKey)
+  ) {
+
+
+  if (this.interactionAction === 'message') {
+    this.toggleDialogue(this.interactionMessage)
+  }
+
+    // External website interaction
+    if (
+      this.interactionAction === 'link' &&
+      this.interactionUrl
+    ) {
+      window.open(this.interactionUrl, '_blank')
+    }
+
+    // Hub transition interaction
+    if (
+      this.interactionAction === 'transition' &&
+      this.interactionTargetMap
+    ) {
+      this.scene.restart({
+        mapKey: this.interactionTargetMap,
+        spawn: this.interactionTargetSpawn
+      })
+    }
+
+    // About portfolio data interaction
+    if (this.interactionAction === 'about') {
+      if (this.dialogueOpen) {
+        this.dialogueText.setVisible(false)
+        this.dialogueOpen = false
+      } else {
+        this.dialogueText.setText(aboutData.description)
+        this.dialogueText.setVisible(true)
+        this.dialogueOpen = true
+      }
+    }
+
+    if (this.interactionAction === 'project') {
+      const project = getProjectById(this.interactionProjectId)
+
+      if (project) {
+        const technologies = project.technologies.join(', ')
+
+        let projectMessage =
+          `${project.title}\n` +
+          `${project.description}\n` +
+          `Technologies: ${technologies}`
+
+          if (project.githubUrl) {
+            projectMessage += '\n[G] Open GitHub Repository'
+          }
+
+          if (project.liveUrl) {
+            projectMessage += '\n[L] Open Live Demo'
+          }
+
+          projectMessage += '\n[E] Close'
+
+        this.toggleDialogue(projectMessage)
+      } else {
+        this.toggleDialogue('Project not found.')
+      }
     }
 
   }
+
+
+  // Open the project's GitHub repository
+  if (
+    this.canInteract &&
+    this.interactionAction === 'project' &&
+    Phaser.Input.Keyboard.JustDown(this.githubKey)
+  ) {
+    const project = getProjectById(this.interactionProjectId)
+
+    if (project?.githubUrl) {
+      window.open(project.githubUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+  // Open the project's live demo
+  if (
+    this.canInteract &&
+    this.interactionAction === 'project' &&
+    Phaser.Input.Keyboard.JustDown(this.liveDemoKey)
+  ) {
+    const project = getProjectById(this.interactionProjectId)
+
+    if (project?.liveUrl) {
+      window.open(project.liveUrl, '_blank', 'noopener,noreferrer')
+    }
+  }
+
+
+  // Automatically close dialogue when appropriate
+  if (
+    this.dialogueOpen &&
+    (
+      !this.canInteract ||
+      (
+        this.interactionAction !== 'message' &&
+        this.interactionAction !== 'about' &&
+        this.interactionAction !== 'project'
+      )
+    )
+  ) {
+    this.dialogueText.setVisible(false)
+    this.dialogueOpen = false
+  }
+}
 
 }
 

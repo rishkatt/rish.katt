@@ -68,7 +68,7 @@
                         {
                          "name":"action",
                          "type":"string",
-                         "value":"message"
+                         "value":"about"
                         }, 
                         {
                          "name":"message",
